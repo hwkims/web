@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL 인코더 및 리다이렉터</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+            box-sizing: border-box; /* padding, border 포함하여 너비 계산 */
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #encodedUrl {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            word-break: break-all;
+            white-space: pre-line;
+        }
+        #redirectMessage {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL 인코더</h1>
+        <input type="text" id="urlInput" placeholder="URL을 입력하세요">
+        <button onclick="encodeAndRedirect()">인코딩 및 이동</button>
+        <div id="encodedUrl"></div>
+        <div id="redirectMessage"></div>
+    </div>
+    <script>
+        function encodeUrlToBase64(url) {
+          try {
+            return btoa(encodeURIComponent(url));
+          } catch (e) {
+              console.error("base64 인코딩 실패:", e);
+              return null;
+          }
+        }
+
+        function decodeBase64ToUrl(base64Url) {
+            try {
+                return decodeURIComponent(atob(base64Url));
+            } catch (e) {
+                console.error("base64 디코딩 실패:", e);
+                return null;
+            }
+        }
+
+        function encodeAndRedirect() {
+            const inputUrl = document.getElementById('urlInput').value;
+            if (!inputUrl) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            const base64Url = encodeUrlToBase64(inputUrl);
+            if (base64Url) {
+                const encodedUrlDiv = document.getElementById('encodedUrl');
+                encodedUrlDiv.textContent = `인코딩된 URL: ${base64Url}`;
+                const githubUrl = `https://hwkims.github.io/web/?io=${base64Url}`;
+                document.getElementById('redirectMessage').textContent = "자동으로 이동합니다...";
+                window.location.href = githubUrl;
+
+            } else {
+                alert("URL 인코딩에 실패했습니다.");
+            }
+        }
+
+         // 페이지 로딩 시 파라미터 확인 및 자동 리다이렉트
+        window.onload = function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const base64UrlParam = urlParams.get('io');
+
+            if(base64UrlParam) {
+                const decodedUrl = decodeBase64ToUrl(base64UrlParam);
+
+                  if(decodedUrl) {
+                    window.location.href = decodedUrl; // 디코딩된 URL로 리다이렉트
+                  } else {
+                      alert("잘못된 base64 URL 입니다.");
+                  }
+            }
+        }
+    </script>
+</body>
+</html>
