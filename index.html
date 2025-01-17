@@ -53,14 +53,35 @@
             margin-top: 10px;
             font-weight: bold;
         }
+        .copy-button {
+          padding: 5px 10px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          margin-left: 5px;
+        }
+        .copy-button:hover {
+          background-color: #1f7a31;
+        }
+
+        .copy-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>URL 인코더</h1>
         <input type="text" id="urlInput" placeholder="URL을 입력하세요">
-        <button onclick="encodeAndRedirect()">인코딩 및 이동</button>
+        <button onclick="encodeAndShow()">인코딩</button>
+        <div class="copy-container">
         <div id="encodedUrl"></div>
+        <button class="copy-button" onclick="copyToClipboard()">복사</button>
+        </div>
         <div id="redirectMessage"></div>
     </div>
     <script>
@@ -81,8 +102,28 @@
                 return null;
             }
         }
+        
+         function copyToClipboard() {
+            const encodedUrlDiv = document.getElementById('encodedUrl');
+            if(encodedUrlDiv.textContent.trim() === ''){
+                alert('인코딩된 URL이 없습니다.')
+                return;
+            }
 
-        function encodeAndRedirect() {
+            const encodedUrlText = encodedUrlDiv.textContent.replace("인코딩된 URL: ", "");
+
+            navigator.clipboard.writeText(
+              `https://hwkims.github.io/web/?io=${encodedUrlText}`
+             ).then(() => {
+                alert('URL이 복사되었습니다!');
+             }).catch(err => {
+                console.error('복사 실패:', err);
+                alert('URL 복사에 실패했습니다.');
+            });
+          }
+
+
+        function encodeAndShow() {
             const inputUrl = document.getElementById('urlInput').value;
             if (!inputUrl) {
                 alert('URL을 입력해주세요.');
@@ -92,9 +133,8 @@
             if (base64Url) {
                 const encodedUrlDiv = document.getElementById('encodedUrl');
                 encodedUrlDiv.textContent = `인코딩된 URL: ${base64Url}`;
-                const githubUrl = `https://hwkims.github.io/web/?io=${base64Url}`;
-                document.getElementById('redirectMessage').textContent = "자동으로 이동합니다...";
-                window.location.href = githubUrl;
+                document.getElementById('redirectMessage').textContent = ""; // 기존 메시지 삭제
+
 
             } else {
                 alert("URL 인코딩에 실패했습니다.");
